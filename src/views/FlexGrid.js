@@ -14,7 +14,7 @@ define(function(require, exports, module) {
 
     FlexGrid.DEFAULT_OPTIONS = {
         marginTop: undefined,
-        marginLeft: undefined,
+        marginSide: undefined,
         gutterCol: undefined,
         gutterRow: undefined,
         itemSize: undefined
@@ -48,16 +48,29 @@ define(function(require, exports, module) {
         var specs = [];
 
         var spacing = _calcSpacing.call(this, width);
-        console.log(spacing);
+
+        var col = 0;
+        var row = 0;
+        var xPos;
+        var yPos;
 
         for (var i = 0; i < this._items.length; i++) {
+            xPos = spacing.marginSide + col * spacing.ySpacing;
+            yPos = this.options.marginTop + row * (this.options.itemSize[1] + this.options.gutterRow);
+
             var spec = {
                 target: this._items[i].render(),
                 size: this.options.itemSize,
-                transform: Transform.translate(0, i * 150, 0)
+                transform: Transform.translate(xPos, yPos, 0)
             }
 
             specs.push(spec);
+
+            col++
+            if (col === spacing.numCols) {
+                row++;
+                col = 0;
+            }
         }
 
         return specs;
