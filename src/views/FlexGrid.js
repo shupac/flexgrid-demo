@@ -79,8 +79,11 @@ define(function(require, exports, module) {
 
     function _animateModifier(index, position, size) {
         var transformTransitionable = this._states[index].transform;
+        var sizeTransitionable = this._states[index].size;
         transformTransitionable.halt();
+        sizeTransitionable.halt();
         transformTransitionable.setTranslate(position, this.options.transition);
+        sizeTransitionable.set(size, this.options.transition);
     }
 
     FlexGrid.prototype.sequenceFrom = function(items) {
@@ -98,14 +101,20 @@ define(function(require, exports, module) {
 
         if (this._cachedWidth !== width) {
             var spacing = _calcSpacing.call(this, width);
+            var size = this.options.itemSize;
+            if (spacing.numCols < 2) {
+                spacing.numCols = 1;
+                spacing.marginSide = 0;
+                size = [width, size[1]];
+            }
             var positions = _calcPositions.call(this, spacing);
 
             for (var i = 0; i < this._items.length; i++) {
                 if (this._modifiers[i] === undefined) {
-                    _createModifier.call(this, i, positions[i]);
+                    _createModifier.call(this, i, positions[i], size);
                 }
                 else {
-                    _animateModifier.call(this, i, positions[i]);
+                    _animateModifier.call(this, i, positions[i], size);
                 }
             }
 
