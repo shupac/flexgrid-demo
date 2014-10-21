@@ -47,33 +47,38 @@ define(function(require, exports, module) {
 
         var specs = [];
 
-        var spacing = _calcSpacing.call(this, width);
+        if (this._cachedWidth !== width) {
+            var spacing = _calcSpacing.call(this, width);
 
-        var col = 0;
-        var row = 0;
-        var xPos;
-        var yPos;
+            var col = 0;
+            var row = 0;
+            var xPos;
+            var yPos;
 
-        for (var i = 0; i < this._items.length; i++) {
-            xPos = spacing.marginSide + col * spacing.ySpacing;
-            yPos = this.options.marginTop + row * (this.options.itemSize[1] + this.options.gutterRow);
+            for (var i = 0; i < this._items.length; i++) {
+                xPos = spacing.marginSide + col * spacing.ySpacing;
+                yPos = this.options.marginTop + row * (this.options.itemSize[1] + this.options.gutterRow);
 
-            var spec = {
-                target: this._items[i].render(),
-                size: this.options.itemSize,
-                transform: Transform.translate(xPos, yPos, 0)
+                var spec = {
+                    target: this._items[i].render(),
+                    size: this.options.itemSize,
+                    transform: Transform.translate(xPos, yPos, 0)
+                }
+
+                specs.push(spec);
+
+                col++
+                if (col === spacing.numCols) {
+                    row++;
+                    col = 0;
+                }
             }
 
-            specs.push(spec);
-
-            col++
-            if (col === spacing.numCols) {
-                row++;
-                col = 0;
-            }
+            this._cachedWidth = width;
+            this._cachedSpecs = specs;
         }
 
-        return specs;
+        return this._cachedSpecs;
     };
 
     module.exports = FlexGrid;
