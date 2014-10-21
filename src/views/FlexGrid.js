@@ -34,6 +34,32 @@ define(function(require, exports, module) {
         }
     }
 
+    function _calcPositions(spacing) {
+        var positions = [];
+
+        var col = 0;
+        var row = 0;
+        var xPos;
+        var yPos;
+
+        for (var i = 0; i < this._items.length; i++) {
+            xPos = spacing.marginSide + col * spacing.ySpacing;
+            yPos = this.options.marginTop + row * (this.options.itemSize[1] + this.options.gutterRow);
+            positions.push({
+                xPos: xPos,
+                yPos: yPos
+            });
+
+            col++
+            if (col === spacing.numCols) {
+                row++;
+                col = 0;
+            }
+        }
+
+        return positions;
+    }
+
     FlexGrid.prototype.sequenceFrom = function(items) {
         this._items = items;
     };
@@ -49,29 +75,16 @@ define(function(require, exports, module) {
 
         if (this._cachedWidth !== width) {
             var spacing = _calcSpacing.call(this, width);
-
-            var col = 0;
-            var row = 0;
-            var xPos;
-            var yPos;
+            var positions = _calcPositions.call(this, spacing);
 
             for (var i = 0; i < this._items.length; i++) {
-                xPos = spacing.marginSide + col * spacing.ySpacing;
-                yPos = this.options.marginTop + row * (this.options.itemSize[1] + this.options.gutterRow);
-
                 var spec = {
                     target: this._items[i].render(),
                     size: this.options.itemSize,
-                    transform: Transform.translate(xPos, yPos, 0)
+                    transform: Transform.translate(positions[i].xPos, positions[i].yPos, 0)
                 }
 
                 specs.push(spec);
-
-                col++
-                if (col === spacing.numCols) {
-                    row++;
-                    col = 0;
-                }
             }
 
             this._cachedWidth = width;
