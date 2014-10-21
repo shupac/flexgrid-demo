@@ -30,6 +30,20 @@ define(function(require, exports, module) {
 
     FlexGrid.prototype.commit = function(context) {
         var width = context.size[0];
+
+        var specs = [];
+
+        for (var i = 0; i < this._items.length; i++) {
+            var spec = {
+                target: this._items[i].render(),
+                size: this.options.itemSize,
+                transform: Transform.translate(0, i * 150, 0)
+            }
+
+            specs.push(spec);
+        }
+
+        return specs;
     };
 
     module.exports = FlexGrid;
