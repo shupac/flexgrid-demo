@@ -20,6 +20,20 @@ define(function(require, exports, module) {
         itemSize: undefined
     };
 
+    function _calcSpacing(width) {
+        var itemWidth = this.options.itemSize[0];
+        var gutterCol = this.options.gutterCol;
+        var ySpacing = itemWidth + gutterCol;
+        var margin = this.options.marginSide;
+        var numCols = Math.floor((width - 2 * margin + gutterCol) / ySpacing);
+        margin = (width - numCols * ySpacing + gutterCol)/2;
+        return {
+            numCols: numCols,
+            marginSide: margin,
+            ySpacing: ySpacing
+        }
+    }
+
     FlexGrid.prototype.sequenceFrom = function(items) {
         this._items = items;
     };
@@ -32,6 +46,9 @@ define(function(require, exports, module) {
         var width = context.size[0];
 
         var specs = [];
+
+        var spacing = _calcSpacing.call(this, width);
+        console.log(spacing);
 
         for (var i = 0; i < this._items.length; i++) {
             var spec = {
