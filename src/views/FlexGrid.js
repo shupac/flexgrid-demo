@@ -19,13 +19,16 @@ define(function(require, exports, module) {
     FlexGrid.prototype = Object.create(View.prototype);
     FlexGrid.prototype.constructor = FlexGrid;
 
+    var initialTime = Date.now();
+
     FlexGrid.DEFAULT_OPTIONS = {
         marginTop: undefined,
         marginSide: undefined,
         gutterCol: undefined,
         gutterRow: undefined,
         itemSize: undefined,
-        transition: { curve: Easing.outBack, duration: 500 }
+        transition: { curve: Easing.outBack, duration: 500 },
+        center: false
     };
 
     function _calcSpacing(width) {
@@ -42,8 +45,30 @@ define(function(require, exports, module) {
         }
     }
 
-    function _calcPositions(spacing) {
-        var positions = [];
+    function _calcCenterLayout() {
+        var layout = {
+            positions: [null],
+            rotations: [],
+            center: true
+        };
+
+        var angle;
+
+        for (var i = 0; i < this._items.length; i++) {
+            angle = (2 * Math.PI / this._items.length);
+            layout.rotations.push([0, 0, angle]);
+            layout.positions.push([0, 0, 0]);
+        }
+
+        return layout;
+    }
+
+    function _calcGridLayout(spacing) {
+        var layout = {
+            positions: [],
+            rotations: [null],
+            center: "test"
+        };
 
         var col = 0;
         var row = 0;
@@ -53,7 +78,7 @@ define(function(require, exports, module) {
         for (var i = 0; i < this._items.length; i++) {
             xPos = spacing.marginSide + col * spacing.ySpacing;
             yPos = this.options.marginTop + row * (this.options.itemSize[1] + this.options.gutterRow);
-            positions.push([xPos, yPos, 0]);
+            layout.positions.push([xPos, yPos, 0]);
 
             col++
             if (col === spacing.numCols) {
@@ -62,28 +87,53 @@ define(function(require, exports, module) {
             }
         }
 
-        return positions;
+        console.log(layout.center);
+
+        return layout;
     }
 
-    function _createModifier(index, position, size) {
-        var transitionItem = {
-            transform: new TransitionableTransform(Transform.translate.apply(null, position)),
-            size: new Transitionable((size || this.options.itemSize))
+    function _createModifier(index, layout, size) {
+
+        var state = {
+            transform: new TransitionableTransform,
+            size: new Transitionable(size || this.options.itemSize),
+            origin: new Transitionable([layout.origin]),
+            align: new Transitionable([layout.align])
         }
 
-        var modifier = new Modifier(transitionItem);
+        state.transform.setTranslate(layout.positions[index]);
+        // if (layout.center === false) {
+        //     state.transform.setRotate([0, 0, (layout.rotations[index]) + .002 * (Date.now() - initialTime)]);
+        // }
 
-        this._states[index] = transitionItem;
+        // if (layout.rotations !== undefined) {
+        //     state.transform.setRotate([0, 0, (layout.rotations[index]) + .002 * (Date.now() - initialTime)]);
+        // } else {
+        //     state.transform.setRotate([0,0,0]);
+        // }
+
+        var modifier = new Modifier(state);
+
+        this._states[index] = state;
         this._modifiers[index] = modifier;
     }
 
-    function _animateModifier(index, position, size) {
+    function _animateModifier(index, layout, size) {
+
         var transformTransitionable = this._states[index].transform;
         var sizeTransitionable = this._states[index].size;
+        var originTransitionable = this._states[index].origin;
+        var alignTransitionable = this._states[index].align;
+
         transformTransitionable.halt();
         sizeTransitionable.halt();
-        transformTransitionable.setTranslate(position, this.options.transition);
+        originTransitionable.halt();
+        alignTransitionable.halt();
+
+        transformTransitionable.set(layout.transform, this.options.transition);
         sizeTransitionable.set(size, this.options.transition);
+        originTransitionable.set(layout.origin, this.options.transition);
+        alignTransitionable.set(layout.align, this.options.align);
     }
 
     FlexGrid.prototype.sequenceFrom = function(items) {
@@ -107,14 +157,18 @@ define(function(require, exports, module) {
                 spacing.marginSide = 0;
                 size = [width, size[1]];
             }
-            var positions = _calcPositions.call(this, spacing);
+
+            var center = this.options.center;
+            var layout = _calcGridLayout.call(this, width);
+
+            console.log(layout);
 
             for (var i = 0; i < this._items.length; i++) {
                 if (this._modifiers[i] === undefined) {
-                    _createModifier.call(this, i, positions[i], size);
+                    _createModifier.call(this, i, layout, size);
                 }
                 else {
-                    _animateModifier.call(this, i, positions[i], size);
+                    _animateModifier.call(this, i, layout, size);
                 }
             }
 
