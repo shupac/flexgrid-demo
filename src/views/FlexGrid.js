@@ -28,7 +28,7 @@ define(function(require, exports, module) {
         gutterRow: undefined,
         itemSize: undefined,
         transition: { curve: Easing.outBack, duration: 500 },
-        center: false
+        center: undefined
     };
 
     function _calcSpacing(width) {
@@ -67,7 +67,7 @@ define(function(require, exports, module) {
         var layout = {
             positions: [],
             rotations: [null],
-            center: "test"
+            center: false
         };
 
         var col = 0;
@@ -79,6 +79,7 @@ define(function(require, exports, module) {
             xPos = spacing.marginSide + col * spacing.ySpacing;
             yPos = this.options.marginTop + row * (this.options.itemSize[1] + this.options.gutterRow);
             layout.positions.push([xPos, yPos, 0]);
+            console.log([xPos, yPos, 0]);
 
             col++
             if (col === spacing.numCols) {
@@ -86,8 +87,6 @@ define(function(require, exports, module) {
                 col = 0;
             }
         }
-
-        console.log(layout.center);
 
         return layout;
     }
@@ -102,6 +101,7 @@ define(function(require, exports, module) {
         }
 
         state.transform.setTranslate(layout.positions[index]);
+        console.log(state.transform);
         // if (layout.center === false) {
         //     state.transform.setRotate([0, 0, (layout.rotations[index]) + .002 * (Date.now() - initialTime)]);
         // }
@@ -158,8 +158,13 @@ define(function(require, exports, module) {
                 size = [width, size[1]];
             }
 
-            var center = this.options.center;
-            var layout = _calcGridLayout.call(this, width);
+            var layout;
+
+            if (this.options.center === undefined || this.options.center === false) {
+                layout = _calcGridLayout.call(this, spacing);
+            } else if (this.options.center === true) {
+                layout = _calcCenterLayout.call(this,spacing);
+            }
 
             console.log(layout);
 
