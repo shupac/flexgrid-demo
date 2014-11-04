@@ -3,11 +3,16 @@ define(function(require, exports, module) {
 
     var Engine = require('famous/core/Engine');
     var Surface = require('famous/core/Surface');
+    var Scrollview = require('famous/views/Scrollview');
     var FlexGrid = require('views/FlexGrid');
 
     var NUM_SURFACES = 24;
 
     var mainContext = Engine.createContext();
+
+    var scrollview = new Scrollview();
+    mainContext.add(scrollview);
+    Engine.pipe(scrollview);
 
     var flexGrid = new FlexGrid({
         marginTop: 50,
@@ -17,7 +22,7 @@ define(function(require, exports, module) {
         itemSize: [150, 100]
     });
 
-    mainContext.add(flexGrid);
+    scrollview.sequenceFrom([flexGrid]);
 
     var surfaces = [];
 

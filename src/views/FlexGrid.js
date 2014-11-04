@@ -10,6 +10,7 @@ define(function(require, exports, module) {
     function FlexGrid() {
         View.apply(this, arguments);
 
+        this._height;
         this._modifiers = [];
         this._states = [];
 
@@ -61,6 +62,8 @@ define(function(require, exports, module) {
                 col = 0;
             }
         }
+
+        this._height = yPos + this.options.itemSize[1] + this.options.marginTop;
 
         return positions;
     }
@@ -130,6 +133,11 @@ define(function(require, exports, module) {
         }
 
         return specs;
+    };
+
+    FlexGrid.prototype.getSize = function() {
+        if (!this._height) return;
+        return [this._cachedWidth, this._height];
     };
 
     module.exports = FlexGrid;
