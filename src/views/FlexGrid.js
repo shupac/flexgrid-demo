@@ -35,6 +35,7 @@ define(function(require, exports, module) {
         var ySpacing = itemWidth + gutterCol;
         var margin = this.options.marginSide;
         var numCols = Math.floor((width - 2 * margin + gutterCol) / ySpacing);
+        numCols = Math.min(this._items.length, numCols);
         margin = (width - numCols * ySpacing + gutterCol)/2;
         return {
             numCols: numCols,
